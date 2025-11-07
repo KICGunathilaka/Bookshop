@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 
-import { Book } from './interfaces/Book';
+export interface Book {
+  id?: number;
+  title: string;
+  author: string;
+  description: string;
+  published_year: number;
+  publisher: string;
+}
+
+import { getBooks, addBook, updateBook, deleteBook } from './services/api';
 import BookList from './components/BookList';
 import AddBookForm from './components/AddBookForm';
 import './App.css';
