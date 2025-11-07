@@ -6,6 +6,18 @@
 DROP TABLE IF EXISTS sale_items, sales, purchase_items, purchases, products, vendors, customers, expenses CASCADE;
 
 -- ==========================================================
+-- Users
+-- ==========================================================
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================================
 -- Vendors
 -- ==========================================================
 CREATE TABLE vendors (
