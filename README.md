@@ -1,62 +1,93 @@
 # Bookshop Management Application
 
-This is a full-stack web application for managing a bookshop. The backend is built with Node.js, Express, and PostgreSQL. The frontend is a single-page application built with a modern JavaScript framework.
+A minimal full-stack app focused on authentication (login) and a dashboard. The backend uses Node.js, Express, and PostgreSQL; the frontend is Vite + React + TypeScript.
+
+## Project Structure
+
+- `backend/`
+  - `index.js`: Express app entry, mounts `/api/auth` and enables CORS.
+  - `routes/`: Route definitions (e.g., `auth.js` exposes `POST /api/auth/login`).
+  - `controllers/`: Route handlers (e.g., `authController.js` performs user lookup and bcrypt password compare).
+  - `config/db.js`: PostgreSQL connection pool.
+  - `database.sql`: SQL schema for required tables (e.g., `users`).
+  - `seedAdmin.js`: Startup seeder ensuring a default admin user exists.
+- `frontend/`
+  - `src/pages/LoginPage.tsx`: Login view with username/password form.
+  - `src/pages/Dashboard.tsx`: Post-login landing page to start building features.
+  - `src/services/api.ts`: Frontend API client (login-only).
+  - `index.html`, `vite.config.ts`: Vite setup files.
+
+## Folder Purposes
+
+- `backend/controllers`: Encapsulates business logic for each route.
+- `backend/routes`: Maps URLs to controllers.
+- `backend/config`: Environment config and DB connections.
+- `backend`: App entry, seeding, and server setup.
+- `frontend/src/pages`: Top-level route views.
+- `frontend/src/services`: API wrappers for backend endpoints.
+- `frontend`: Vite project with build/dev configuration.
 
 ## Prerequisites
 
-- Node.js
-- PostgreSQL
+- Node.js 18+
+- PostgreSQL 13+
+- Git
 
-## Getting Started
+## Clone & Branch Workflow
 
-### Backend
+Use the following as a template; replace placeholders with your repo details.
 
-1.  Navigate to the `backend` directory:
-    ```bash
-    cd backend
-    ```
+- Clone the repository:
+  - `git clone <REPO_URL>`
+  - `cd bookshop-management`
+- Switch to or create the appropriate branch:
+  - View branches: `git branch -a`
+  - Checkout existing: `git checkout <BRANCH_NAME>`
+  - Create feature branch: `git checkout -b feature/<short-description>`
+- Start coding on your branch and push:
+  - `git add . && git commit -m "feat: add login-only UI"`
+  - `git push -u origin feature/<short-description>`
 
-2.  Install the dependencies:
-    ```bash
-    npm install
-    ```
+## Backend Database Setup
 
-3.  Create a `.env` file in the `backend` directory and add the following environment variables:
+1. Create a PostgreSQL database (example: `Bookshop`).
+2. Run `backend/database.sql` to create required tables (ensure a `users` table with `username`, `email`, and `password_hash`).
+3. Create `backend/.env` with your DB connection settings:
+   - `DB_USER=postgres`
+   - `DB_PASSWORD=postgres`
+   - `DB_HOST=localhost`
+   - `DB_PORT=5432`
+   - `DB_DATABASE=Bookshop`
+4. Start the backend, which will seed a default admin user on first run:
+   - `cd backend`
+   - `npm install`
+   - `node index.js`
+   - Logs should include: `Server running on port 5000` and either `Admin user created` or `Admin user already exists`.
 
-    ```
-    DB_USER=postgres
-    DB_PASSWORD=postgres
-    DB_HOST=localhost
-    DB_PORT=5432
-    DB_DATABASE=Bookshop
-    ```
+Default admin credentials (for local development):
+- Username: `Admin`
+- Password: `Admin123`
 
-4.  Create the `Bookshop` database in PostgreSQL.
+## Frontend Setup & Run
 
-5.  Run the `database.sql` script to create the `books` table. You can use a PostgreSQL client like `psql` or a GUI tool to execute the script.
+1. Install and start the dev server:
+   - `cd frontend`
+   - `npm install`
+   - `npm run dev`
+2. Open `http://localhost:5173/` and log in with the admin credentials.
+3. On success, you land on the Dashboard page.
 
-6.  Start the backend server:
-    ```bash
-    node index.js
-    ```
+## Authentication Flow
 
-    The backend server will be running on `http://localhost:5000`.
+- Endpoint: `POST http://localhost:5000/api/auth/login`
+- Request body: `{ "username": "Admin", "password": "Admin123" }`
+- Success response: `{ "message": "Login successful", "user": { "user_id": <number>, "username": "Admin" } }`
 
-### Frontend
+## Where to Add Features Next
 
-1.  Navigate to the `frontend` directory:
-    ```bash
-    cd frontend
-    ```
+- Frontend pages live in `frontend/src/pages` (e.g., expand `Dashboard.tsx`).
+- Backend endpoints live in `backend/routes` and `backend/controllers` (e.g., add `routes/feature.js` + `controllers/featureController.js`).
 
-2.  Install the dependencies:
-    ```bash
-    npm install
-    ```
+## Notes
 
-3.  Start the frontend development server:
-    ```bash
-    npm run dev
-    ```
-
-    The frontend application will be running on `http://localhost:5173`.
+- The app has been cleaned to keep only login and dashboard. Any book-related pages and APIs have been removed.
