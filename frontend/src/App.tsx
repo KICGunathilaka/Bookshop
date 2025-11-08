@@ -1,57 +1,33 @@
-import React, { useState, useEffect } from 'react';
-
-export interface Book {
-  id?: number;
-  title: string;
-  author: string;
-  description: string;
-  published_year: number;
-  publisher: string;
-}
-
-import { getBooks, addBook, updateBook, deleteBook } from './services/api';
-import BookList from './components/BookList';
-import AddBookForm from './components/AddBookForm';
+import React, { useState } from 'react';
 import './App.css';
+import Dashboard from './components/Dashboard';
+import LoginPage from './pages/LoginPage';
 
 const App: React.FC = () => {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchBooks();
-  }, []);
-
-  const fetchBooks = async () => {
-    const books = await getBooks();
-    setBooks(books);
+  const handleLoginSuccess = (user: { user_id: number; username: string }) => {
+    setIsLoggedIn(true);
+    setUsername(user.username);
   };
 
-  const handleAddBook = async (book: Book) => {
-    await addBook(book);
-    fetchBooks();
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUsername(null);
   };
 
-  const handleUpdateBook = async (id: number, book: Book) => {
-    await updateBook(id, book);
-    setEditingBook(null);
-    fetchBooks();
-  };
-
-  const handleDeleteBook = async (id: number) => {
-    await deleteBook(id);
-    fetchBooks();
-  };
-
-  const handleEditBook = (book: Book) => {
-    setEditingBook(book);
-  };
+  if (!isLoggedIn) {
+    return <LoginPage onLogin={handleLoginSuccess} />;
+  }
 
   return (
     <div className="App">
-      <h1>Bookshop Management</h1>
-      <AddBookForm onAdd={handleAddBook} onUpdate={handleUpdateBook} editingBook={editingBook} />
-      <BookList books={books} onDelete={handleDeleteBook} onEdit={handleEditBook} />
+      <Dashboard />
+      <div style={{ marginTop: '1rem' }}>
+        <p>Logged in as: {username}</p>
+        <button onClick={handleLogout}>Logout</button>
+      </div>
     </div>
   );
 };
