@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
-import Dashboard from './components/Dashboard';
+import Dashboard from './pages/Dashboard';
 import LoginPage from './pages/LoginPage';
 
 const App: React.FC = () => {
