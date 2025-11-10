@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import './App.css';
 import Dashboard from './pages/Dashboard';
 import LoginPage from './pages/LoginPage';
+import Products from './pages/Products';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -22,13 +24,18 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="App">
-      <Dashboard />
-      <div style={{ marginTop: '1rem' }}>
-        <p>Logged in as: {username}</p>
-        <button onClick={handleLogout}>Logout</button>
+    <BrowserRouter>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/products" element={<Products />} />
+        </Routes>
+        <div className="app-actions">
+          <p className="app-user">Logged in as: {username}</p>
+          <button className="primary-button" onClick={handleLogout}>Logout</button>
+        </div>
       </div>
-    </div>
+    </BrowserRouter>
   );
 };
 
