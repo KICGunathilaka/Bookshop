@@ -3,7 +3,7 @@ import './App.css';
 import Dashboard from './pages/Dashboard';
 import LoginPage from './pages/LoginPage';
 import Products from './pages/Products';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,21 +19,30 @@ const App: React.FC = () => {
     setUsername(null);
   };
 
-  if (!isLoggedIn) {
-    return <LoginPage onLogin={handleLoginSuccess} />;
-  }
-
   return (
     <BrowserRouter>
       <div className="App">
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/products" element={<Products />} />
+          {isLoggedIn ? (
+            <>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/login" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </>
+          ) : (
+            <>
+              <Route path="/login" element={<LoginPage onLogin={handleLoginSuccess} />} />
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </>
+          )}
         </Routes>
-        <div className="app-actions">
-          <p className="app-user">Logged in as: {username}</p>
-          <button className="primary-button" onClick={handleLogout}>Logout</button>
-        </div>
+        {isLoggedIn && (
+          <div className="app-actions" aria-label="Top actions">
+            <Link to="/" className="secondary-button" title="Go to Dashboard">Home</Link>
+            <button className="primary-button" onClick={handleLogout} title="Logout">Logout</button>
+          </div>
+        )}
       </div>
     </BrowserRouter>
   );

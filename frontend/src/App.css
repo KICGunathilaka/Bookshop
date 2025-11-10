@@ -225,6 +225,65 @@ button {
   box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15), 0 10px 24px rgba(0, 0, 0, 0.08);
 }
 
+/* Date input with calendar button */
+.products-filters .date-input {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.products-filters .date-input input[type="date"] {
+  padding-right: 36px; /* space for calendar button */
+}
+
+/* Modern react-datepicker theming */
+.react-datepicker {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 34px rgba(0,0,0,0.12);
+  background: var(--surface);
+}
+.react-datepicker__header {
+  background: var(--navy);
+  color: #fff;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+.react-datepicker__current-month,
+.react-datepicker-time__header,
+.react-datepicker-year-header {
+  color: #fff;
+}
+.react-datepicker__day,
+.react-datepicker__day-name {
+  color: var(--text);
+}
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background: var(--navy);
+  color: #fff;
+}
+.react-datepicker__day:hover {
+  background: var(--navy-soft);
+}
+.react-datepicker__navigation-icon::before {
+  border-color: #fff;
+}
+.react-datepicker-input {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--text);
+  outline: none;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.react-datepicker-input:focus {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(30,58,138,0.15), 0 10px 24px rgba(0,0,0,0.08);
+}
+
 .secondary-button {
   background-color: var(--muted);
   color: var(--text);
@@ -267,6 +326,47 @@ button {
   background-color: var(--navy-soft);
 }
 
+/* Panel section card for non-table content (e.g., Add form) */
+.panel-section {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  background: var(--surface);
+  padding: 14px 16px;
+}
+
+.panel-section h2 {
+  margin: 0 0 10px 0;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+  padding: 1rem 1.25rem;
+  width: min(720px, 92vw);
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.modal-card h2 {
+  margin: 0 0 0.75rem 0;
+}
+
 /* Responsive layout */
 @media (max-width: 768px) {
   .dashboard-layout {
@@ -289,21 +389,23 @@ button {
   --primary-soft: #e8f0fe;
   --primary-text: #0b1b3a;
   --sidebar-width: 260px;
+  --muted-text: #6b7280;
+  --muted: #eef2f7;
 }
 
-/* Logout controls sized to sidebar */
+/* Top-right actions bar */
 .app-actions {
-  width: var(--sidebar-width);
-  margin-top: 1rem;
-}
-
-.app-user {
-  margin: 0 0 0.5rem 0;
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  z-index: 1000;
 }
 
 .primary-button {
-  width: 100%;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-radius: 10px;
   background-color: var(--navy);
   color: #fff;
@@ -316,6 +418,76 @@ button {
   opacity: 0.95;
   transform: translateY(-1px);
   box-shadow: 0 14px 34px rgba(30, 58, 138, 0.26);
+}
+
+.app-actions .primary-button,
+.app-actions .secondary-button {
+  width: auto;
+}
+
+/* Add Product form refined layout to match list view aesthetics */
+/* Unified form grid used in Add form and Edit modal */
+.products-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  gap: 12px 16px;
+}
+
+.products-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.products-form input,
+.products-form select {
+  width: 100%;
+  max-width: 100%;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--text);
+  outline: none;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.products-form input:focus,
+.products-form select:focus {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15), 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.products-form button[type="submit"] {
+  justify-self: start;
+}
+
+@media (max-width: 768px) {
+  .products-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Compact variant to match list view’s smaller inputs */
+.products-form.compact {
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 8px 12px;
+}
+
+.products-form.compact label {
+  gap: 5px;
+}
+
+.products-form.compact input,
+.products-form.compact select {
+  max-width: 300px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.products-form.compact select {
+  max-width: 220px;
 }
 
 /* Extended theme tokens */
