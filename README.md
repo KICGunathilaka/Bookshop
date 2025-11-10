@@ -1,6 +1,31 @@
 # Bookshop Management Application
 
-This is a full-stack web application for managing a bookshop. The backend is built with Node.js, Express, and PostgreSQL. The frontend is a single-page application built with a modern JavaScript framework.
+A minimal full-stack app focused on authentication (login) and a dashboard. The backend uses Node.js, Express, and PostgreSQL; the frontend is Vite + React + TypeScript.
+
+## Project Structure
+
+- `backend/`
+  - `index.js`: Express app entry, mounts `/api/auth` and enables CORS.
+  - `routes/`: Route definitions (e.g., `auth.js` exposes `POST /api/auth/login`).
+  - `controllers/`: Route handlers (e.g., `authController.js` performs user lookup and bcrypt password compare).
+  - `config/db.js`: PostgreSQL connection pool.
+  - `database.sql`: SQL schema for required tables (e.g., `users`).
+  - `seedAdmin.js`: Startup seeder ensuring a default admin user exists.
+- `frontend/`
+  - `src/pages/LoginPage.tsx`: Login view with username/password form.
+  - `src/pages/Dashboard.tsx`: Post-login landing page to start building features.
+  - `src/services/api.ts`: Frontend API client (login-only).
+  - `index.html`, `vite.config.ts`: Vite setup files.
+
+## Folder Purposes
+
+- `backend/controllers`: Encapsulates business logic for each route.
+- `backend/routes`: Maps URLs to controllers.
+- `backend/config`: Environment config and DB connections.
+- `backend`: App entry, seeding, and server setup.
+- `frontend/src/pages`: Top-level route views.
+- `frontend/src/services`: API wrappers for backend endpoints.
+- `frontend`: Vite project with build/dev configuration.
 
 ## Prerequisites
 
