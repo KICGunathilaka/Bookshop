@@ -37,6 +37,8 @@ export interface ProductFilters {
   brand?: string;
   min_price?: number;
   max_price?: number;
+  from_date?: string; // YYYY-MM-DD
+  to_date?: string;   // YYYY-MM-DD
 }
 
 export interface ProductListResponse {
@@ -55,5 +57,23 @@ export interface ProductListResponse {
 
 export const getProducts = async (filters: ProductFilters = {}): Promise<ProductListResponse> => {
   const response = await axios.get(API_URL, { params: filters });
+  return response.data;
+};
+
+export interface UpdateProductInput {
+  product_name?: string;
+  category?: string | null;
+  brand?: string | null;
+  unit?: string;
+  purchase_price?: number;
+  selling_price?: number;
+  stock_quantity?: number;
+}
+
+export const updateProduct = async (
+  product_id: number,
+  payload: UpdateProductInput
+): Promise<{ message: string; product: any }> => {
+  const response = await axios.put(`${API_URL}/${product_id}`, payload);
   return response.data;
 };
