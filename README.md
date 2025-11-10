@@ -91,3 +91,82 @@ Default admin credentials (for local development):
 ## Notes
 
 - The app has been cleaned to keep only login and dashboard. Any book-related pages and APIs have been removed.
+
+## Team & Environment Rules (Project-specific)
+
+1. Package manager and lockfiles
+
+- Node.js: use `npm` only. Keep both `package.json` and `package-lock.json` committed in `backend/` and `frontend/`.
+- Why: Lockfiles pin exact versions so everyone installs the same dependencies.
+
+Recommended install commands after pulling the repo:
+
+```
+# Install EXACT versions from the lockfiles (no modifications)
+cd backend && npm ci
+cd ../frontend && npm ci
+```
+
+Node.js workflow when ADDING a new package (frontend example):
+
+```
+# Install a new package and save to package.json
+npm install crypto-js --save
+
+# Commit the updated dependency files
+git add package.json package-lock.json
+git commit -m "Add crypto-js package"
+git push
+
+# Other developers should pull the branch and run exact installs
+npm ci
+```
+
+This ensures everyone has the exact same package and version, and avoids lockfile drift.
+
+2. Environment configuration
+
+- Include a `.env.example` file in Git.
+- Developers copy it to `.env` and set their own keys/URLs.
+- Avoid committing secrets while ensuring everyone knows the required environment variables.
+- Backend example already provided at `backend/.env.example`.
+- Frontend example (create `frontend/.env.example` if needed):
+
+```
+# Vite reads variables prefixed with VITE_
+VITE_API_URL=http://localhost:5000
+```
+
+3. Node version management
+
+- Use `nvm` to enforce one Node.js version for the whole project.
+- Project baseline: Node.js 18 LTS (recommended: `18.20.4`).
+- Suggested `.nvmrc` contents (optional, commit to repo):
+
+```
+18.20.4
+```
+
+- Usage:
+
+```
+nvm install
+nvm use
+```
+
+- Why: Prevents version mismatch errors across developers.
+
+4. Optional: Docker for consistent environment
+
+- If the project uses multiple services (frontend + backend + database), a `docker-compose` setup ensures everyone runs the project in the same environment.
+- Pros: No “works on my machine” errors; all services and packages are consistent.
+- Hot-reloading can still be enabled with volume mounts for development.
+
+5. Team rules to avoid install conflicts
+
+- Always use `npm ci` after pulling or on CI to install exact versions from lockfiles.
+- Do not delete or ignore `package-lock.json`. It must be committed.
+- Never install a package locally without committing the updated `package.json` and `package-lock.json`.
+- Add packages only in the target workspace (`backend/` or `frontend/`) where they are used.
+- Avoid `npm update` or broad upgrades on feature branches. Use a dedicated maintenance PR for dependency bumps.
+- Document setup steps clearly so new developers can run the project without issues.
