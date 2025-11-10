@@ -3,6 +3,7 @@ import './App.css';
 import Dashboard from './pages/Dashboard';
 import LoginPage from './pages/LoginPage';
 import Products from './pages/Products';
+import Vendors from './pages/Vendors';
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 
 const App: React.FC = () => {
@@ -27,6 +28,7 @@ const App: React.FC = () => {
             <>
               <Route path="/" element={<Dashboard />} />
               <Route path="/products" element={<Products />} />
+              <Route path="/vendors" element={<Vendors />} />
               <Route path="/login" element={<Navigate to="/" replace />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </>

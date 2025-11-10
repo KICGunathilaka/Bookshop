@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
+const vendorRoutes = require('./routes/vendors');
 const seedAdmin = require('./seedAdmin');
 
 // Load env vars
@@ -18,6 +19,7 @@ app.use(cors());
 // Mount routers
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/vendors', vendorRoutes);
 
 const PORT = process.env.PORT || 5000;
 

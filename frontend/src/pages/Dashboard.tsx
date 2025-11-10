@@ -15,6 +15,14 @@ const Dashboard: React.FC = () => {
               Products
             </NavLink>
           </li>
+          <li>
+            <NavLink
+              to="/vendors"
+              className={({ isActive }) => (isActive ? 'navlink active' : 'navlink')}
+            >
+              Vendors
+            </NavLink>
+          </li>
         </ul>
       </nav>
       <div className="dashboard-content">
