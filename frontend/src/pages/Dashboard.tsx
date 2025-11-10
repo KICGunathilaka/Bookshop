@@ -1,10 +1,26 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
   return (
-    <div className="dashboard-container">
-      <h1>Dashboard</h1>
-      <p>Welcome! You can build out this page later.</p>
+    <div className="dashboard-layout">
+      <nav className="sidebar">
+        <div className="sidebar-brand">Bookshop</div>
+        <ul className="sidebar-menu">
+          <li>
+            <NavLink
+              to="/products"
+              className={({ isActive }) => (isActive ? 'navlink active' : 'navlink')}
+            >
+              Products
+            </NavLink>
+          </li>
+        </ul>
+      </nav>
+      <div className="dashboard-content">
+        <h1>Dashboard</h1>
+        <p>Welcome! You can build out this page later.</p>
+      </div>
     </div>
   );
 };
