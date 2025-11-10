@@ -29,65 +29,59 @@ A minimal full-stack app focused on authentication (login) and a dashboard. The 
 
 ## Prerequisites
 
-- Node.js 18+
-- PostgreSQL 13+
-- Git
+- Node.js
+- PostgreSQL
 
-## Clone & Branch Workflow
+## Getting Started
 
-Use the following as a template; replace placeholders with your repo details.
+### Backend
 
-- Clone the repository:
-  - `git clone <REPO_URL>`
-  - `cd bookshop-management`
-- Switch to or create the appropriate branch:
-  - View branches: `git branch -a`
-  - Checkout existing: `git checkout <BRANCH_NAME>`
-  - Create feature branch: `git checkout -b feature/<short-description>`
-- Start coding on your branch and push:
-  - `git add . && git commit -m "feat: add login-only UI"`
-  - `git push -u origin feature/<short-description>`
+1.  Navigate to the `backend` directory:
+    ```bash
+    cd backend
+    ```
 
-## Backend Database Setup
+2.  Install the dependencies:
+    ```bash
+    npm install
+    ```
 
-1. Create a PostgreSQL database (example: `Bookshop`).
-2. Run `backend/database.sql` to create required tables (ensure a `users` table with `username`, `email`, and `password_hash`).
-3. Create `backend/.env` with your DB connection settings:
-   - `DB_USER=postgres`
-   - `DB_PASSWORD=postgres`
-   - `DB_HOST=localhost`
-   - `DB_PORT=5432`
-   - `DB_DATABASE=Bookshop`
-4. Start the backend, which will seed a default admin user on first run:
-   - `cd backend`
-   - `npm install`
-   - `node index.js`
-   - Logs should include: `Server running on port 5000` and either `Admin user created` or `Admin user already exists`.
+3.  Create a `.env` file in the `backend` directory and add the following environment variables:
 
-Default admin credentials (for local development):
-- Username: `Admin`
-- Password: `Admin123`
+    ```
+    DB_USER=postgres
+    DB_PASSWORD=postgres
+    DB_HOST=localhost
+    DB_PORT=5432
+    DB_DATABASE=Bookshop
+    ```
 
-## Frontend Setup & Run
+4.  Create the `Bookshop` database in PostgreSQL.
 
-1. Install and start the dev server:
-   - `cd frontend`
-   - `npm install`
-   - `npm run dev`
-2. Open `http://localhost:5173/` and log in with the admin credentials.
-3. On success, you land on the Dashboard page.
+5.  Run the `database.sql` script to create the `books` table. You can use a PostgreSQL client like `psql` or a GUI tool to execute the script.
 
-## Authentication Flow
+6.  Start the backend server:
+    ```bash
+    node index.js
+    ```
 
-- Endpoint: `POST http://localhost:5000/api/auth/login`
-- Request body: `{ "username": "Admin", "password": "Admin123" }`
-- Success response: `{ "message": "Login successful", "user": { "user_id": <number>, "username": "Admin" } }`
+    The backend server will be running on `http://localhost:5000`.
 
-## Where to Add Features Next
+### Frontend
 
-- Frontend pages live in `frontend/src/pages` (e.g., expand `Dashboard.tsx`).
-- Backend endpoints live in `backend/routes` and `backend/controllers` (e.g., add `routes/feature.js` + `controllers/featureController.js`).
+1.  Navigate to the `frontend` directory:
+    ```bash
+    cd frontend
+    ```
 
-## Notes
+2.  Install the dependencies:
+    ```bash
+    npm install
+    ```
 
-- The app has been cleaned to keep only login and dashboard. Any book-related pages and APIs have been removed.
+3.  Start the frontend development server:
+    ```bash
+    npm run dev
+    ```
+
+    The frontend application will be running on `http://localhost:5173`.
