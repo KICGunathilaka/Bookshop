@@ -203,9 +203,9 @@ button {
 
 /* Products list filters */
 .products-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
   margin-bottom: 14px;
   align-items: center;
 }
@@ -218,6 +218,13 @@ button {
   outline: none;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
   transition: border-color 160ms ease, box-shadow 160ms ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.products-filters input[type="text"],
+.products-filters input[type="number"] {
+  min-width: 180px;
 }
 
 .products-filters input:focus {
@@ -230,10 +237,30 @@ button {
   position: relative;
   display: inline-flex;
   align-items: center;
+  width: 100%;
 }
 
 .products-filters .date-input input[type="date"] {
   padding-right: 36px; /* space for calendar button */
+}
+
+.products-filters .react-datepicker-input {
+  min-width: 200px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.products-filters .primary-button,
+.products-filters .secondary-button {
+  justify-self: start;
+}
+
+/* Force single column on small screens to prevent crowding */
+@media (max-width: 640px) {
+  .products-filters {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }
 
 /* Modern react-datepicker theming */
