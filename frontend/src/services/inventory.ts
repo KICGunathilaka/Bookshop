@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5001/api/inventory';
+const API_URL = 'http://localhost:5000/api/inventory';
 
 export type InventoryItem = {
   inventory_id: number;

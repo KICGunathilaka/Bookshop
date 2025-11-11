@@ -51,6 +51,7 @@ Full-stack app for managing products, purchases, sales, inventory, expenses, and
 6. Start the backend server (single terminal):
    - `node index.js`
    - Confirm it prints `Server running on port 5000`.
+   - If it prints `5001`, update `backend/.env` to `PORT=5000`.
 
 ## Frontend Setup
 

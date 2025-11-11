@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5001/api/expenses';
+const API_URL = 'http://localhost:5000/api/expenses';
 
 export type ExpenseInput = {
   expenseName: string;
