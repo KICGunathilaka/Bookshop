@@ -13,7 +13,6 @@ export default function Toast({ toasts, onDismiss }: { toasts: ToastItem[]; onDi
         {latest.type === 'error' && (
           <div className="message">{latest.message}</div>
         )}
-        <button className="close" aria-label="Dismiss" onClick={() => onDismiss(latest.id)}>×</button>
       </div>
     </div>
   );

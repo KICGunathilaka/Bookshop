@@ -19,10 +19,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const id = idCounter.current++;
     const item: ToastItem = { id, type, message };
     setToasts(prev => [...prev, item]);
-    // Auto-dismiss after 3 seconds
+    // Auto-dismiss: reduce duration to 800ms for all types
+    const durationMs = 800;
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
-    }, 3000);
+    }, durationMs);
   }
 
   const notifySuccess = (message: string) => pushToast('success', message);
