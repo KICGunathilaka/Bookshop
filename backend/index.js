@@ -6,6 +6,8 @@ const productRoutes = require('./routes/products');
 const vendorRoutes = require('./routes/vendors');
 const purchaseRoutes = require('./routes/purchases');
 const inventoryRoutes = require('./routes/inventory');
+const salesRoutes = require('./routes/sales');
+const expensesRoutes = require('./routes/expenses');
 const seedAdmin = require('./seedAdmin');
 
 // Load env vars
@@ -24,6 +26,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/purchases', purchaseRoutes);
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/sales', salesRoutes);
+app.use('/api/expenses', expensesRoutes);
 
 const PORT = process.env.PORT || 5000;
 
