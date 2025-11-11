@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { createExpense } from '../services/expenses';
+import { useNotify } from '../contexts/NotificationContext';
 
 export default function Expenses() {
+  const { notifySuccess, notifyError } = useNotify();
   const [expenseName, setExpenseName] = useState('');
   const [expenseDate, setExpenseDate] = useState(''); // YYYY-MM-DD
   const [expenseDateObj, setExpenseDateObj] = useState<Date | null>(null);
@@ -43,6 +45,7 @@ export default function Expenses() {
         note: note || null,
       });
       setMessage('Expense recorded successfully');
+      notifySuccess('Expense recorded successfully');
       setExpenseName('');
       setExpenseDate('');
       setAmount('');
@@ -50,6 +53,7 @@ export default function Expenses() {
     } catch (err: any) {
       console.error('Create expense error:', err);
       setError(err?.message || 'Failed to record expense');
+      notifyError(err?.message || 'Failed to record expense');
     } finally {
       setSubmitting(false);
     }

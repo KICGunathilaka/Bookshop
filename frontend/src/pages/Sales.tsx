@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { listInventory } from '../services/inventory';
 import { createSale, getNextInvoiceNo } from '../services/sales';
 import type { SaleItemInput, SaleInput } from '../services/sales';
+import { useNotify } from '../contexts/NotificationContext';
+// Removed metrics summary; Sales page focuses on creating product sales only
 
 type InventoryOption = {
   inventory_id: number;
@@ -12,6 +14,7 @@ type InventoryOption = {
 };
 
 export default function Sales() {
+  const { notifySuccess, notifyError } = useNotify();
   const [invoiceNo, setInvoiceNo] = useState<string>('');
   const [saleDate, setSaleDate] = useState<string>('');
   const [customerName, setCustomerName] = useState<string>('');
@@ -117,6 +120,7 @@ export default function Sales() {
     try {
       await createSale(payload);
       setMessage('Sale created successfully');
+      notifySuccess('Sale created successfully');
       // Reset form
       setInvoiceNo('');
       setSaleDate('');
@@ -128,6 +132,7 @@ export default function Sales() {
     } catch (err: any) {
       console.error('Create sale error:', err);
       setError(err?.message || 'Failed to create sale');
+      notifyError(err?.message || 'Failed to create sale');
     } finally {
       setSubmitting(false);
     }
@@ -137,7 +142,7 @@ export default function Sales() {
     <div className="products-page">
       <h1>Sales</h1>
       <div className="products-panel" role="tabpanel">
-        {/* View content can go here in future */}
+        {/* Sales page no longer displays combined summary; see Dashboard */}
 
         {/* Create Sale Form at bottom */}
         <div className="panel-section">

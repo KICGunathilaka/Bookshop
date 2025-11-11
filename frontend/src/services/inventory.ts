@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:5000/api/inventory';
+// Temporarily point inventory API to backend on port 5001 to ensure updated
+// consumption logic is active while port 5000 server is restarted.
+const API_URL = 'http://localhost:5001/api/inventory';
 
 export type InventoryItem = {
   inventory_id: number;
@@ -36,5 +38,18 @@ export async function listInventory(params: {
   if (params.limit) url.searchParams.set('limit', String(params.limit));
   const res = await fetch(url.toString());
   if (!res.ok) throw new Error('Failed to fetch inventory');
+  return res.json();
+}
+
+export async function consumeInventory(payload: { items: Array<{ inventoryId: number; quantity: number; unitPrice?: number }>; note?: string | null }) {
+  const res = await fetch(`${API_URL}/consume`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || 'Failed to consume inventory');
+  }
   return res.json();
 }

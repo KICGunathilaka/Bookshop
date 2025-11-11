@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { addProduct, getProducts } from '../services/products';
+import { useNotify } from '../contexts/NotificationContext';
 
 type TabKey = 'list' | 'add' | 'edit';
 
 const Products: React.FC = () => {
+  const { notifySuccess, notifyError } = useNotify();
   const [activeTab, setActiveTab] = useState<TabKey>('list');
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -34,10 +36,10 @@ const Products: React.FC = () => {
 
     try {
       const res = await addProduct(payload);
-      alert(`Product saved (ID: ${res.product.product_id})`);
+      notifySuccess('Product saved');
       form.reset();
     } catch (err) {
-      alert('Failed to save product');
+      notifyError('Failed to save product');
       console.error(err);
     }
   };
@@ -45,7 +47,7 @@ const Products: React.FC = () => {
   const handleEditSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // TODO: wire to backend API
-    alert('Edit product submitted');
+    notifySuccess('Edit product submitted');
   };
 
   const fetchList = async () => {

@@ -10,6 +10,7 @@ import Sales from './pages/Sales';
 import Expenses from './pages/Expenses';
 import Reports from './pages/Reports';
 import Alert from './pages/Alert';
+import PrintshopSales from './pages/PrintshopSales';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 
 // Top-right actions bar, hidden on Dashboard route
@@ -59,6 +60,7 @@ const App: React.FC = () => {
               <Route path="/purchases" element={<Purchases />} />
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/sales" element={<Sales />} />
+        <Route path="/printshop-sales" element={<PrintshopSales />} />
         <Route path="/expenses" element={<Expenses />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/alerts" element={<Alert />} />

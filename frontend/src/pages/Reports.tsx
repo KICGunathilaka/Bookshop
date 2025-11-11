@@ -3,10 +3,13 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { listInventory, type InventoryItem } from '../services/inventory';
 import { listSales, type SaleListItem } from '../services/sales';
+import { listPrintshopSales, type PrintshopSaleListItem } from '../services/printshopSales';
 import { listPurchases, type PurchaseListItem } from '../services/purchases';
 import { listExpenses, type ExpenseListItem } from '../services/expenses';
+import { downloadPrintshopItemsCSV } from '../services/reports';
+import { listPrintshopItems, type PrintshopItem } from '../services/printshopItems';
 
-type ReportTab = 'inventory' | 'sales' | 'purchases' | 'summary';
+type ReportTab = 'inventory' | 'sales' | 'printshop' | 'printshop_items' | 'purchases' | 'summary';
 
 const Reports: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ReportTab>('summary');
@@ -18,7 +21,9 @@ const Reports: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [sales, setSales] = useState<SaleListItem[]>([]);
+  const [printshopSales, setPrintshopSales] = useState<PrintshopSaleListItem[]>([]);
   const [purchases, setPurchases] = useState<PurchaseListItem[]>([]);
+  const [printshopItems, setPrintshopItems] = useState<PrintshopItem[]>([]);
   const [expenses, setExpenses] = useState<ExpenseListItem[]>([]);
 
   const shopName = 'Bookshop';
@@ -53,7 +58,17 @@ const Reports: React.FC = () => {
   };
 
   const reportTitle = useMemo(() => {
-    const name = activeTab === 'summary' ? 'Summary Report' : activeTab === 'inventory' ? 'Inventory Report' : activeTab === 'sales' ? 'Sales Report' : 'Purchases Report';
+    const name = activeTab === 'summary'
+      ? 'Summary Report'
+      : activeTab === 'inventory'
+      ? 'Inventory Report'
+      : activeTab === 'sales'
+      ? 'Sales Report'
+      : activeTab === 'printshop'
+      ? 'Printshop Sales Report'
+      : activeTab === 'printshop_items'
+      ? 'Printshop Items Report'
+      : 'Purchases Report';
     const range = fromDate && toDate ? ` (${fromDate} → ${toDate})` : '';
     return `${shopName} — ${name}${range}`;
   }, [activeTab, fromDate, toDate]);
@@ -68,18 +83,26 @@ const Reports: React.FC = () => {
       } else if (activeTab === 'sales') {
         const { sales } = await listSales({ from: fromDate || undefined, to: toDate || undefined, limit: 200 });
         setSales(sales);
+      } else if (activeTab === 'printshop') {
+        const { sales } = await listPrintshopSales({ from: fromDate || undefined, to: toDate || undefined, limit: 200 });
+        setPrintshopSales(sales);
       } else if (activeTab === 'purchases') {
         const { purchases } = await listPurchases({ from: fromDate || undefined, to: toDate || undefined, limit: 200 });
         setPurchases(purchases);
+      } else if (activeTab === 'printshop_items') {
+        const { items } = await listPrintshopItems({ from: fromDate || undefined, to: toDate || undefined, limit: 500 });
+        setPrintshopItems(items);
       } else {
-        const [invRes, salRes, purRes, expRes] = await Promise.all([
+        const [invRes, salRes, psRes, purRes, expRes] = await Promise.all([
           listInventory({ from: fromDate || undefined, to: toDate || undefined, limit: 500 }),
           listSales({ from: fromDate || undefined, to: toDate || undefined, limit: 200 }),
+          listPrintshopSales({ from: fromDate || undefined, to: toDate || undefined, limit: 200 }),
           listPurchases({ from: fromDate || undefined, to: toDate || undefined, limit: 200 }),
           listExpenses({ from: fromDate || undefined, to: toDate || undefined, limit: 500 }),
         ]);
         setInventory(invRes.items);
         setSales(salRes.sales);
+        setPrintshopSales(psRes.sales);
         setPurchases(purRes.purchases);
         setExpenses(expRes.expenses);
       }
@@ -117,6 +140,8 @@ const Reports: React.FC = () => {
           <button className={`tab-btn ${activeTab === 'summary' ? 'active' : ''}`} onClick={() => setActiveTab('summary')}>Summary</button>
           <button className={`tab-btn ${activeTab === 'inventory' ? 'active' : ''}`} onClick={() => setActiveTab('inventory')}>Inventory</button>
           <button className={`tab-btn ${activeTab === 'sales' ? 'active' : ''}`} onClick={() => setActiveTab('sales')}>Sales</button>
+          <button className={`tab-btn ${activeTab === 'printshop' ? 'active' : ''}`} onClick={() => setActiveTab('printshop')}>Printshop Sales</button>
+          <button className={`tab-btn ${activeTab === 'printshop_items' ? 'active' : ''}`} onClick={() => setActiveTab('printshop_items')}>Printshop Items</button>
           <button className={`tab-btn ${activeTab === 'purchases' ? 'active' : ''}`} onClick={() => setActiveTab('purchases')}>Purchases</button>
         </div>
         <div className="panel-section" style={{ alignItems: 'flex-end' }}>
@@ -155,6 +180,15 @@ const Reports: React.FC = () => {
             <div style={{ gap: 8, display: 'flex' }}>
               <button className="secondary-button" type="button" onClick={() => downloadExcelFromTable('report-table', activeTab)}>Download Excel</button>
               <button className="secondary-button" type="button" onClick={printReport}>Download PDF</button>
+              {activeTab === 'printshop_items' && (
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={() => downloadPrintshopItemsCSV({ from: fromDate || undefined, to: toDate || undefined, filename: 'printshop_items.csv' })}
+                >
+                  Download CSV
+                </button>
+              )}
             </div>
           </div>
           {loading && <div>Loading...</div>}
@@ -200,6 +234,10 @@ const Reports: React.FC = () => {
                       <th>Invoice</th>
                       <th>Date</th>
                       <th>Customer</th>
+                      <th>Phone</th>
+                      <th>Address</th>
+                      <th>Remark</th>
+                      <th>Items</th>
                       <th>Total</th>
                     </tr>
                   </thead>
@@ -210,11 +248,50 @@ const Reports: React.FC = () => {
                         <td>{s.invoice_no || '-'}</td>
                         <td>{s.sale_date}</td>
                         <td>{s.customer_name || '-'}</td>
+                        <td>{s.customer_phone || '-'}</td>
+                        <td>{s.customer_address || '-'}</td>
+                        <td>{s.note || '-'}</td>
+                        <td>{(s.items || []).length > 0 ? s.items.map(it => `${it.product_name}${it.brand ? ` (${it.brand})` : ''} x ${it.quantity} @ ${Number(it.unit_price).toFixed(2)}`).join('; ') : '-'}</td>
                         <td>{Number(s.total_amount).toFixed(2)}</td>
                       </tr>
                     ))}
                     {sales.length === 0 && (
-                      <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--muted-text)' }}>No sales</td></tr>
+                      <tr><td colSpan={9} style={{ textAlign: 'center', color: 'var(--muted-text)' }}>No sales</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              )}
+              {activeTab === 'printshop' && (
+                <table id="report-table" className="products-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Invoice</th>
+                      <th>Date</th>
+                      <th>Customer</th>
+                      <th>Phone</th>
+                      <th>Address</th>
+                      <th>Remark</th>
+                      <th>Items</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {printshopSales.map(s => (
+                      <tr key={s.printshop_sale_id}>
+                        <td>{s.printshop_sale_id}</td>
+                        <td>{s.invoice_no || '-'}</td>
+                        <td>{s.sale_date}</td>
+                        <td>{s.customer_name || '-'}</td>
+                        <td>{s.customer_phone || '-'}</td>
+                        <td>{s.customer_address || '-'}</td>
+                        <td>{s.note || '-'}</td>
+                        <td>{(s.items || []).length > 0 ? s.items.map(it => `${it.product_name}${it.brand ? ` (${it.brand})` : ''} x ${it.quantity} @ ${Number(it.unit_price).toFixed(2)}`).join('; ') : '-'}</td>
+                        <td>{Number(s.total_amount).toFixed(2)}</td>
+                      </tr>
+                    ))}
+                    {printshopSales.length === 0 && (
+                      <tr><td colSpan={9} style={{ textAlign: 'center', color: 'var(--muted-text)' }}>No printshop sales</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -271,6 +348,37 @@ const Reports: React.FC = () => {
                       <td>{sales.length}</td>
                       <td>{sales.reduce((sum, s) => sum + Number(s.total_amount || 0), 0).toFixed(2)}</td>
                     </tr>
+                  </tbody>
+                </table>
+              )}
+              {activeTab === 'printshop_items' && (
+                <table id="report-table" className="products-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Product</th>
+                      <th>Brand</th>
+                      <th>Quantity</th>
+                      <th>Unit Price</th>
+                      <th>Total</th>
+                      <th>Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {printshopItems.map(it => (
+                      <tr key={it.item_id}>
+                        <td>{it.item_id}</td>
+                        <td>{it.product_name || '-'}</td>
+                        <td>{it.brand || '-'}</td>
+                        <td>{it.quantity}</td>
+                        <td>{Number(it.unit_price).toFixed(2)}</td>
+                        <td>{Number(it.total_amount).toFixed(2)}</td>
+                        <td>{new Date(it.created_at).toLocaleDateString()}</td>
+                      </tr>
+                    ))}
+                    {printshopItems.length === 0 && (
+                      <tr><td colSpan={7} style={{ textAlign: 'center', color: 'var(--muted-text)' }}>No printshop items</td></tr>
+                    )}
                   </tbody>
                 </table>
               )}

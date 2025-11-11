@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { addVendor, getVendors } from '../services/vendors';
+import { useNotify } from '../contexts/NotificationContext';
 
 type TabKey = 'list' | 'add';
 
 const Vendors: React.FC = () => {
+  const { notifySuccess, notifyError } = useNotify();
   const [activeTab, setActiveTab] = useState<TabKey>('list');
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -58,12 +60,12 @@ const Vendors: React.FC = () => {
 
     try {
       const res = await addVendor(payload);
-      alert(`Vendor saved (ID: ${res.vendor.vendor_id})`);
+      notifySuccess('Vendor saved');
       form.reset();
       setActiveTab('list');
       fetchList();
     } catch (err) {
-      alert('Failed to save vendor');
+      notifyError('Failed to save vendor');
       console.error(err);
     }
   };

@@ -7,7 +7,9 @@
 -- ==========================================================
 
 -- Drop old tables if exist (for re-creation)
-DROP TABLE IF EXISTS sale_items, sales, purchase_items, purchases, products, vendors, customers, expenses CASCADE;
+DROP TABLE IF EXISTS printshop_sale_items, printshop_sales, printshop_items,
+  sale_items, sales, purchase_items, purchases, inventory_items,
+  products, vendors, expenses CASCADE;
 
 -- ==========================================================
 -- Users
@@ -202,3 +204,111 @@ CREATE TRIGGER trg_before_insert_purchase_item
 BEFORE INSERT ON purchase_items
 FOR EACH ROW
 EXECUTE FUNCTION before_insert_purchase_item();
+
+-- ==========================================================
+-- Printshop Sales (Header)
+-- ==========================================================
+CREATE TABLE printshop_sales (
+    printshop_sale_id SERIAL PRIMARY KEY,
+    invoice_no VARCHAR(50),
+    sale_date DATE DEFAULT CURRENT_DATE,
+    total_amount NUMERIC(12,2) DEFAULT 0,
+    customer_name VARCHAR(255),
+    customer_phone VARCHAR(50),
+    customer_address TEXT,
+    note TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================================
+-- Printshop Sale Items (Details)
+-- ==========================================================
+CREATE TABLE printshop_sale_items (
+    printshop_sale_item_id SERIAL PRIMARY KEY,
+    printshop_sale_id INT REFERENCES printshop_sales(printshop_sale_id) ON DELETE CASCADE,
+    inventory_id INT REFERENCES inventory_items(inventory_id) ON DELETE CASCADE,
+    brand VARCHAR(50),
+    quantity INT NOT NULL,
+    unit_price NUMERIC(12,2) NOT NULL,
+    total_price NUMERIC(12,2) GENERATED ALWAYS AS (quantity * unit_price) STORED
+);
+
+-- ==========================================================
+-- Printshop Items (Direct Consumption Logs)
+-- ==========================================================
+CREATE TABLE printshop_items (
+    printshop_item_id SERIAL PRIMARY KEY,
+    inventory_id INT REFERENCES inventory_items(inventory_id) ON DELETE CASCADE,
+    product_id INT REFERENCES products(product_id),
+    brand VARCHAR(50),
+    quantity INT NOT NULL,
+    unit_price NUMERIC(12,2) NOT NULL,
+    total_amount NUMERIC(12,2) GENERATED ALWAYS AS (quantity * unit_price) STORED,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================================
+-- PRINTSHOP: Stock Triggers for Sale Items
+-- ==========================================================
+CREATE OR REPLACE FUNCTION decrement_stock_on_insert_printshop()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE inventory_items
+    SET stock_quantity = stock_quantity - NEW.quantity
+    WHERE inventory_id = NEW.inventory_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_decrement_stock_on_insert_printshop
+AFTER INSERT ON printshop_sale_items
+FOR EACH ROW
+EXECUTE FUNCTION decrement_stock_on_insert_printshop();
+
+CREATE OR REPLACE FUNCTION revert_stock_on_delete_printshop()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE inventory_items
+    SET stock_quantity = stock_quantity + OLD.quantity
+    WHERE inventory_id = OLD.inventory_id;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_revert_stock_on_delete_printshop
+AFTER DELETE ON printshop_sale_items
+FOR EACH ROW
+EXECUTE FUNCTION revert_stock_on_delete_printshop();
+
+-- ==========================================================
+-- PRINTSHOP: Stock Triggers for Direct Consumption (printshop_items)
+-- ==========================================================
+CREATE OR REPLACE FUNCTION decrement_stock_on_insert_printshop_items()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE inventory_items
+    SET stock_quantity = stock_quantity - NEW.quantity
+    WHERE inventory_id = NEW.inventory_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_decrement_stock_on_insert_printshop_items
+AFTER INSERT ON printshop_items
+FOR EACH ROW
+EXECUTE FUNCTION decrement_stock_on_insert_printshop_items();
+
+CREATE OR REPLACE FUNCTION revert_stock_on_delete_printshop_items()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE inventory_items
+    SET stock_quantity = stock_quantity + OLD.quantity
+    WHERE inventory_id = OLD.inventory_id;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_revert_stock_on_delete_printshop_items
+AFTER DELETE ON printshop_items
+FOR EACH ROW
+EXECUTE FUNCTION revert_stock_on_delete_printshop_items();
