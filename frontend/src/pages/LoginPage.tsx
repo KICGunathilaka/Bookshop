@@ -27,38 +27,42 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="login-container" style={{ maxWidth: 360, margin: '4rem auto' }}>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label htmlFor="username">Username</label>
-          <input
-            id="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Admin"
-            required
-            style={{ width: '100%', padding: '0.5rem' }}
-          />
-        </div>
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Admin123"
-            required
-            style={{ width: '100%', padding: '0.5rem' }}
-          />
-        </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit" disabled={loading} style={{ width: '100%', padding: '0.6rem' }}>
-          {loading ? 'Logging in…' : 'Login'}
-        </button>
-      </form>
+    <div style={{ maxWidth: 460, margin: '3rem auto' }}>
+      <div className="panel-section">
+        <h2>Login</h2>
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="username">Username</label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter username"
+              required
+              className="text-input"
+            />
+          </div>
+          <div style={{ marginTop: 10 }}>
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
+              required
+              className="text-input"
+            />
+          </div>
+          {error && <div style={{ color: 'var(--danger)', marginTop: 8 }}>{error}</div>}
+          <div className="inline-actions" style={{ marginTop: 12 }}>
+            <button type="submit" className="primary-button" disabled={loading}>
+              {loading ? 'Logging in…' : 'Login'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

@@ -1,49 +1,42 @@
-import axios from 'axios';
-
 const API_URL = 'http://localhost:5001/api/vendors';
 
-export interface VendorInput {
+export type Vendor = {
+  vendor_id: number;
   vendor_name: string;
   contact_number?: string | null;
   email?: string | null;
   address?: string | null;
-}
-
-export interface VendorResponse {
-  message: string;
-  vendor: {
-    vendor_id: number;
-    vendor_name: string;
-    contact_number: string | null;
-    email: string | null;
-    address: string | null;
-    created_at: string;
-  };
-}
-
-export const addVendor = async (payload: VendorInput): Promise<VendorResponse> => {
-  const response = await axios.post(API_URL, payload);
-  return response.data;
+  created_at?: string;
 };
 
-export interface VendorFilters {
-  q?: string;
-  from_date?: string; // YYYY-MM-DD
-  to_date?: string;   // YYYY-MM-DD
-}
-
-export interface VendorListResponse {
-  items: Array<{
-    vendor_id: number;
-    vendor_name: string;
-    contact_number: string | null;
-    email: string | null;
-    address: string | null;
-    created_at: string;
-  }>;
-}
-
-export const getVendors = async (filters: VendorFilters = {}): Promise<VendorListResponse> => {
-  const response = await axios.get(API_URL, { params: filters });
-  return response.data;
+export type VendorInput = {
+  vendor_name: string;
+  contact_number?: string | null;
+  email?: string | null;
+  address?: string | null;
 };
+
+export async function addVendor(payload: VendorInput) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error('Failed to create vendor');
+  return res.json();
+}
+
+export async function getVendors(filters: { q?: string; from_date?: string; to_date?: string } = {}) {
+  const params = new URLSearchParams();
+  if (filters.q) params.set('q', filters.q);
+  if (filters.from_date) params.set('from_date', filters.from_date);
+  if (filters.to_date) params.set('to_date', filters.to_date);
+  const res = await fetch(`${API_URL}?${params.toString()}`);
+  if (!res.ok) throw new Error('Failed to fetch vendors');
+  return res.json();
+}
+
+export async function searchVendors(q: string) {
+  const data = await getVendors({ q });
+  return (data?.items ?? []) as Vendor[];
+}
