@@ -186,6 +186,29 @@ button {
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
+/* Match textarea styling to inputs for a consistent look */
+.products-panel textarea {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--text);
+  outline: none;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+  width: 100%;
+  max-width: 720px;
+  margin: 0; /* override global margin */
+  min-height: 96px;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.products-panel textarea:focus {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15), 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
 .products-panel select {
   max-width: 220px;
 }
@@ -335,6 +358,7 @@ button {
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  table-layout: fixed; /* respect column width percentages to prevent overlap */
 }
 
 .products-table thead th {
@@ -347,6 +371,18 @@ button {
 .products-table tbody td {
   padding: 10px 12px;
   border-top: 1px solid var(--border);
+}
+
+/* Ensure inputs fit within table cells */
+.products-table input,
+.products-table .react-datepicker-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Allow suggestions to use full cell width without capping */
+.products-table .input-with-suggestions {
+  max-width: 100%;
 }
 
 .products-table tbody tr:hover {
@@ -429,6 +465,58 @@ button {
   gap: 10px;
   align-items: center;
   z-index: 1000;
+}
+
+/* Inline actions (non-fixed) for page-local controls */
+.inline-actions {
+  position: static;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Suggestion dropdown styles */
+.input-with-suggestions {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+}
+
+.suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.12);
+  max-height: 240px;
+  overflow: auto;
+  z-index: 1000;
+}
+
+.suggestion-item {
+  padding: 8px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.suggestion-item:hover,
+.suggestion-item.active {
+  background: var(--navy-soft);
+}
+
+.suggestion-title {
+  font-weight: 600;
+}
+
+.suggestion-meta {
+  color: var(--muted-text);
+  font-size: 0.9rem;
 }
 
 .primary-button {
