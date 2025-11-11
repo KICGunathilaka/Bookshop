@@ -31,6 +31,7 @@ const TopActions: React.FC<{
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLoginSuccess = (user: { user_id: number; username: string }) => {
     setIsLoggedIn(true);
@@ -42,13 +43,17 @@ const App: React.FC = () => {
     setUsername(null);
   };
 
+  const requestLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
   return (
     <BrowserRouter>
       <div className="App">
         <Routes>
           {isLoggedIn ? (
             <>
-              <Route path="/" element={<Dashboard onLogout={handleLogout} />} />
+              <Route path="/" element={<Dashboard onLogout={requestLogout} />} />
               <Route path="/products" element={<Products />} />
               <Route path="/vendors" element={<Vendors />} />
               <Route path="/purchases" element={<Purchases />} />
@@ -67,7 +72,28 @@ const App: React.FC = () => {
             </>
           )}
         </Routes>
-        <TopActions isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+        <TopActions isLoggedIn={isLoggedIn} onLogout={requestLogout} />
+
+        {showLogoutConfirm && (
+          <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="logout-title">
+            <div className="modal-card">
+              <h2 id="logout-title">Confirm Logout</h2>
+              <p>Are you sure you want to log out?</p>
+              <div className="inline-actions" style={{ marginTop: 12 }}>
+                <button className="secondary-button" onClick={() => setShowLogoutConfirm(false)}>No</button>
+                <button
+                  className="primary-button"
+                  onClick={() => {
+                    setShowLogoutConfirm(false);
+                    handleLogout();
+                  }}
+                >
+                  Yes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </BrowserRouter>
   );
