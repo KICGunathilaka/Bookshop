@@ -1,87 +1,83 @@
 # Bookshop Management Application
 
-A minimal full-stack app focused on authentication (login) and a dashboard. The backend uses Node.js, Express, and PostgreSQL; the frontend is Vite + React + TypeScript.
+Full-stack app for managing products, purchases, sales, inventory, expenses, and reports. Backend uses Node.js + Express + PostgreSQL; frontend uses Vite + React + TypeScript.
+
+**Important:** Follow the steps below exactly to avoid port conflicts and server issues.
 
 ## Project Structure
 
 - `backend/`
-  - `index.js`: Express app entry, mounts `/api/auth` and enables CORS.
-  - `routes/`: Route definitions (e.g., `auth.js` exposes `POST /api/auth/login`).
-  - `controllers/`: Route handlers (e.g., `authController.js` performs user lookup and bcrypt password compare).
-  - `config/db.js`: PostgreSQL connection pool.
-  - `database.sql`: SQL schema for required tables (e.g., `users`).
-  - `seedAdmin.js`: Startup seeder ensuring a default admin user exists.
+  - `index.js`: Express app entry; mounts `/api/auth`, `/api/products`, `/api/vendors`, `/api/purchases`, `/api/inventory`, `/api/sales`, `/api/expenses`.
+  - `routes/`: Route definitions for each domain.
+  - `controllers/`: Business logic per route (CRUD, transactions, validations).
+  - `config/db.js`: PostgreSQL connection (reads `.env`).
+  - `database.sql`: Base schema and triggers.
+  - `migrations/`: Incremental SQL changes.
+  - `migrate.js`: Applies SQL files in `migrations/` in order.
+  - `seedAdmin.js`: Ensures default admin user exists at startup.
 - `frontend/`
-  - `src/pages/LoginPage.tsx`: Login view with username/password form.
-  - `src/pages/Dashboard.tsx`: Post-login landing page to start building features.
-  - `src/services/api.ts`: Frontend API client (login-only).
-  - `index.html`, `vite.config.ts`: Vite setup files.
-
-## Folder Purposes
-
-- `backend/controllers`: Encapsulates business logic for each route.
-- `backend/routes`: Maps URLs to controllers.
-- `backend/config`: Environment config and DB connections.
-- `backend`: App entry, seeding, and server setup.
-- `frontend/src/pages`: Top-level route views.
-- `frontend/src/services`: API wrappers for backend endpoints.
-- `frontend`: Vite project with build/dev configuration.
+  - `src/pages/*`: App pages.
+  - `src/services/*`: API clients (base URLs target `http://localhost:5000/api`).
+  - `vite.config.ts`: Vite config.
 
 ## Prerequisites
 
-- Node.js
-- PostgreSQL
+- Node.js 18+
+- PostgreSQL 13+
 
-## Getting Started
+## Backend Setup
 
-### Backend
+1. Open a terminal and go to `backend`.
+   - `cd backend`
 
-1.  Navigate to the `backend` directory:
-    ```bash
-    cd backend
-    ```
+2. Install dependencies.
+   - `npm install`
 
-2.  Install the dependencies:
-    ```bash
-    npm install
-    ```
+3. Create `backend/.env` with these variables (adjust as needed):
+   - `DB_USER=postgres`
+   - `DB_PASSWORD=postgres`
+   - `DB_HOST=localhost`
+   - `DB_PORT=5432`
+   - `DB_DATABASE=Bookshop`
+   - `PORT=5000`  (required: frontend expects backend on `5000`)
+   - `ALLOW_PASSWORDLESS_LOGIN=false` (optional; set `true` only if needed)
 
-3.  Create a `.env` file in the `backend` directory and add the following environment variables:
+4. Create the database in PostgreSQL (once).
+   - `createdb Bookshop` (or via pgAdmin/GUI)
 
-    ```
-    DB_USER=postgres
-    DB_PASSWORD=postgres
-    DB_HOST=localhost
-    DB_PORT=5432
-    DB_DATABASE=Bookshop
-    ```
+5. Initialize schema and triggers (run once):
+   - Use `psql` or GUI to execute `backend/database.sql` against the `Bookshop` DB.
 
-4.  Create the `Bookshop` database in PostgreSQL.
+6. Start the backend server (single terminal):
+   - `node index.js`
+   - Confirm it prints `Server running on port 5000`.
 
-5.  Run the `database.sql` script to create the `books` table. You can use a PostgreSQL client like `psql` or a GUI tool to execute the script.
+## Frontend Setup
 
-6.  Start the backend server:
-    ```bash
-    node index.js
-    ```
+1. Open a separate terminal and go to `frontend`.
+   - `cd frontend`
 
-    The backend server will be running on `http://localhost:5000`.
+2. Install dependencies.
+   - `npm install`
 
-### Frontend
+3. Start the dev server (single instance to avoid port churn):
+   - `npm run dev -- --port 5173`
+   - Open the printed URL (e.g., `http://localhost:5173/`).
+   - If another dev server is already running, stop it first to avoid auto-switching to `5174`, `5175`, etc.
 
-1.  Navigate to the `frontend` directory:
-    ```bash
-    cd frontend
-    ```
+## Login
 
-2.  Install the dependencies:
-    ```bash
-    npm install
-    ```
+- Default admin is seeded automatically on backend start.
+- Try `Admin` / `Admin123`.
 
-3.  Start the frontend development server:
-    ```bash
-    npm run dev
-    ```
+## Troubleshooting
 
-    The frontend application will be running on `http://localhost:5173`.
+- Backend not reachable: Ensure `.env` sets `PORT=5000` and the terminal shows `Server running on port 5000`.
+- Frontend using the wrong API port: All services point to `http://localhost:5000/api`. Do not change backend port unless you also update those service URLs.
+- Multiple frontend dev servers (5174/5175/5176): Close all other dev terminals; run `npm run dev -- --port 5173` once.
+- Database connection errors: Verify `DB_*` values in `.env`, database exists, and PostgreSQL is running.
+- Schema errors: Re-run `backend/database.sql` on the DB, then `node migrate.js`.
+
+## Start Order
+
+- Always start backend first on `5000`, then start the frontend dev server on `5173`.

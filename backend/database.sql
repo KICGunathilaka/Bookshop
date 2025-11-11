@@ -75,12 +75,11 @@ CREATE TABLE purchase_items (
     purchase_item_id SERIAL PRIMARY KEY,
     purchase_id INT REFERENCES purchases(purchase_id) ON DELETE CASCADE,
     inventory_id INT REFERENCES inventory_items(inventory_id) ON DELETE CASCADE,
+    brand VARCHAR(50),
     quantity INT NOT NULL,
     unit_price NUMERIC(12,2) NOT NULL,
     total_price NUMERIC(12,2) GENERATED ALWAYS AS (quantity * unit_price) STORED
 );
-
-ALTER TABLE purchase_items ADD COLUMN brand VARCHAR(50);
 
 -- ==========================================================
 -- Sales (Header)
@@ -104,11 +103,11 @@ CREATE TABLE sale_items (
     sale_item_id SERIAL PRIMARY KEY,
     sale_id INT REFERENCES sales(sale_id) ON DELETE CASCADE,
     inventory_id INT REFERENCES inventory_items(inventory_id) ON DELETE SET NULL,
+    brand VARCHAR(50),
     quantity INT NOT NULL,
     unit_price NUMERIC(12,2) NOT NULL,
     total_price NUMERIC(12,2) GENERATED ALWAYS AS (quantity * unit_price) STORED
 );
-ALTER TABLE sale_items ADD COLUMN brand VARCHAR(50);
 
 -- ==========================================================
 -- Expenses
