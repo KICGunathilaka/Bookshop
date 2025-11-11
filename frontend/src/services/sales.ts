@@ -55,3 +55,11 @@ export async function listSales(params: { q?: string; from?: string | null; to?:
   if (!res.ok) throw new Error('Failed to fetch sales');
   return res.json();
 }
+
+export async function getNextInvoiceNo(): Promise<{ nextInvoiceNo: string }> {
+  const res = await fetch(`${API_URL}/next-invoice`);
+  if (!res.ok) {
+    throw new Error('Failed to fetch next sales invoice number');
+  }
+  return res.json();
+}

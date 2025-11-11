@@ -47,7 +47,34 @@ async function addSale(req, res) {
 
     const sale = saleRes.rows[0];
 
-    // Insert each sale item and decrement stock
+    // Validate stock availability atomically before inserting sale_items
+    const requestedByInventory = new Map();
+    for (const it of items) {
+      const invId = Number(it.inventoryId);
+      const qty = Number(it.quantity);
+      requestedByInventory.set(invId, (requestedByInventory.get(invId) ?? 0) + qty);
+    }
+
+    // Lock inventory rows and verify sufficient stock
+    for (const [invId, totalQty] of requestedByInventory.entries()) {
+      const lockRes = await client.query(
+        `SELECT stock_quantity FROM inventory_items WHERE inventory_id = $1 FOR UPDATE`,
+        [invId]
+      );
+      if (lockRes.rowCount === 0) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: `Inventory item ${invId} not found` });
+      }
+      const available = Number(lockRes.rows[0].stock_quantity);
+      if (available < totalQty) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({
+          error: `Insufficient stock for inventory ${invId}. Requested ${totalQty}, available ${available}.`,
+        });
+      }
+    }
+
+    // Insert each sale item (stock is decremented via DB trigger on sale_items)
     for (const it of items) {
       const invId = Number(it.inventoryId);
       const qty = Number(it.quantity);
@@ -56,10 +83,6 @@ async function addSale(req, res) {
         `INSERT INTO sale_items (sale_id, inventory_id, quantity, unit_price, brand)
          VALUES ($1, $2, $3, $4, $5)`,
         [sale.sale_id, invId, qty, price, it.brand ?? null]
-      );
-      await client.query(
-        `UPDATE inventory_items SET stock_quantity = stock_quantity - $1 WHERE inventory_id = $2`,
-        [qty, invId]
       );
     }
 
@@ -143,3 +166,22 @@ async function listSales(req, res) {
 }
 
 module.exports = { addSale, listSales };
+// Suggest next invoice number based on existing numeric invoice_no values
+async function getNextInvoiceNo(req, res) {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      `SELECT MAX(CASE WHEN invoice_no ~ '^[0-9]+' THEN invoice_no::int ELSE NULL END) AS max_no FROM sales`
+    );
+    const maxNo = result.rows[0]?.max_no ?? 0;
+    const nextNo = Number(maxNo) + 1;
+    return res.json({ nextInvoiceNo: String(nextNo) });
+  } catch (err) {
+    console.error('Get next sales invoice no error:', err);
+    return res.status(500).json({ error: 'Failed to compute next sales invoice number' });
+  } finally {
+    client.release();
+  }
+}
+
+module.exports.getNextInvoiceNo = getNextInvoiceNo;

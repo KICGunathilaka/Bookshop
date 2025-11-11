@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { listInventory } from '../services/inventory';
-import { createSale } from '../services/sales';
+import { createSale, getNextInvoiceNo } from '../services/sales';
 import type { SaleItemInput, SaleInput } from '../services/sales';
 
 type InventoryOption = {
@@ -45,6 +45,23 @@ export default function Sales() {
       }
     }
     loadInventory();
+  }, []);
+
+  // Auto-fill next invoice number on mount if empty
+  useEffect(() => {
+    async function autofillInvoice() {
+      try {
+        if (!invoiceNo.trim()) {
+          const { nextInvoiceNo } = await getNextInvoiceNo();
+          setInvoiceNo(nextInvoiceNo ?? '');
+        }
+      } catch (e) {
+        // Silent fail; user can still type manually
+      }
+    }
+    autofillInvoice();
+    // Only run on initial mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const totalAmount = useMemo(() => {
@@ -131,7 +148,21 @@ export default function Sales() {
             <div className="products-filters" style={{ alignItems: 'flex-end' }}>
               <div>
                 <label>Invoice No</label>
-                <input className="text-input" type="text" value={invoiceNo} onChange={(e) => setInvoiceNo(e.target.value)} placeholder="Optional" />
+                <input
+                  className="text-input"
+                  type="text"
+                  value={invoiceNo}
+                  onChange={(e) => setInvoiceNo(e.target.value)}
+                  onFocus={async () => {
+                    if (!invoiceNo.trim()) {
+                      try {
+                        const { nextInvoiceNo } = await getNextInvoiceNo();
+                        setInvoiceNo(nextInvoiceNo ?? '');
+                      } catch {}
+                    }
+                  }}
+                  placeholder="Optional"
+                />
               </div>
               <div>
                 <label>Sale Date</label>

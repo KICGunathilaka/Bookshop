@@ -22,7 +22,7 @@ const TopActions: React.FC<{
   if (!isLoggedIn || isDashboard) return null;
   return (
     <div className="app-actions" aria-label="Top actions">
-      <Link to="/" className="secondary-button" title="Go to Dashboard">Home</Link>
+      <Link to="/" className="primary-button" title="Go to Dashboard">Home</Link>
       <button className="primary-button" onClick={onLogout} title="Logout">Logout</button>
     </div>
   );
