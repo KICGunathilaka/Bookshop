@@ -65,10 +65,16 @@ const Dashboard: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
         setInventoryCount((invAllRes.items ?? []).length);
 
         // Sales summary
+        const fmt = (d: Date) => {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          return `${y}-${m}-${dd}`;
+        };
         const today = new Date();
-        const to = today.toISOString().slice(0, 10);
-        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
-        const sevenDaysAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6).toISOString().slice(0, 10);
+        const to = fmt(today);
+        const monthStart = fmt(new Date(today.getFullYear(), today.getMonth(), 1));
+        const sevenDaysAgo = fmt(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6));
 
         const salesForMonth = await listSales({ from: monthStart, to, limit: 1000 });
         const salesToday = await listSales({ from: to, to, limit: 1000 });
@@ -126,7 +132,7 @@ const Dashboard: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
         const dates: string[] = [];
         for (let i = 6; i >= 0; i--) {
           const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
-          const ds = d.toISOString().slice(0, 10);
+          const ds = fmt(d);
           dates.push(ds);
         }
         setWeeklySales(dates.map(ds => ({ date: ds, bookshop: byDayBook.get(ds) || 0, printshop: byDayPrint.get(ds) || 0 })));

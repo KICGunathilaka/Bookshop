@@ -24,17 +24,11 @@ async function getSalesSummary(req, res) {
           COALESCE(SUM(CASE WHEN ps.sale_date >= (SELECT month_start FROM bounds) AND ps.sale_date < (SELECT month_end FROM bounds) THEN ps.total_amount ELSE 0 END), 0) AS month_amount
         FROM printshop_sales ps
       ),
-      printshop_items AS (
-        SELECT
-          COALESCE(SUM(CASE WHEN (pi.created_at)::date = (SELECT today FROM bounds) THEN pi.total_amount ELSE 0 END), 0) AS today_amount,
-          COALESCE(SUM(CASE WHEN pi.created_at >= (SELECT month_start FROM bounds) AND pi.created_at < (SELECT month_end FROM bounds) THEN pi.total_amount ELSE 0 END), 0) AS month_amount
-        FROM printshop_items pi
-      ),
       printshop AS (
         SELECT
-          (ps.today_amount + pi.today_amount) AS today_amount,
-          (ps.month_amount + pi.month_amount) AS month_amount
-        FROM printshop_sales ps, printshop_items pi
+          ps.today_amount AS today_amount,
+          ps.month_amount AS month_amount
+        FROM printshop_sales ps
       )
       SELECT
         b.today_amount AS bookshop_today,

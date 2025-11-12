@@ -1,5 +1,5 @@
 // Temporarily point metrics to backend on port 5001 to pick up updated summary
-const API_URL = 'http://localhost:5001/api/metrics';
+const API_URL = 'http://localhost:5000/api/metrics';
 
 export type SalesSummary = {
   today: { bookshop: number; printshop: number; total: number };

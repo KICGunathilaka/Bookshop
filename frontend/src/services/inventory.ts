@@ -1,6 +1,6 @@
 // Temporarily point inventory API to backend on port 5001 to ensure updated
 // consumption logic is active while port 5000 server is restarted.
-const API_URL = 'http://localhost:5001/api/inventory';
+const API_URL = 'http://localhost:5000/api/inventory';
 
 export type InventoryItem = {
   inventory_id: number;

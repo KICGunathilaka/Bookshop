@@ -1,5 +1,5 @@
 // Temporarily point printshop sales API to backend on port 5001
-const API_URL = 'http://localhost:5001/api/printshop-sales';
+const API_URL = 'http://localhost:5000/api/printshop-sales';
 
 export type PrintshopSaleItemInput = {
   inventoryId: number;

@@ -3,14 +3,30 @@ const pool = require('../config/db');
 // Add a new product to the products table (simplified schema)
 async function addProduct(req, res) {
   try {
-    const {
-      product_name,
-      category = null,
-      unit = 'pcs',
-    } = req.body;
+    const rawName = req.body?.product_name;
+    const rawCategory = req.body?.category ?? null;
+    const rawUnit = req.body?.unit ?? 'pcs';
+    const product_name = typeof rawName === 'string' ? rawName.trim() : rawName;
+    const category = typeof rawCategory === 'string' ? rawCategory.trim() : rawCategory;
+    const unit = typeof rawUnit === 'string' ? rawUnit.trim() : rawUnit;
 
     if (!product_name || typeof product_name !== 'string') {
       return res.status(400).json({ error: 'product_name is required' });
+    }
+    if (product_name.length > 100) {
+      return res.status(400).json({ error: 'product_name must be 100 characters or less' });
+    }
+    if (category !== null && typeof category !== 'string') {
+      return res.status(400).json({ error: 'category must be a string or null' });
+    }
+    if (typeof category === 'string' && category.length > 50) {
+      return res.status(400).json({ error: 'category must be 50 characters or less' });
+    }
+    if (!unit || typeof unit !== 'string') {
+      return res.status(400).json({ error: 'unit is required' });
+    }
+    if (unit.length > 20) {
+      return res.status(400).json({ error: 'unit must be 20 characters or less' });
     }
 
     const result = await pool.query(
@@ -27,6 +43,10 @@ async function addProduct(req, res) {
     });
   } catch (err) {
     console.error('Add product error:', err);
+    const msg = err?.message || '';
+    if (/value too long/i.test(msg)) {
+      return res.status(400).json({ error: 'One or more fields exceed maximum length' });
+    }
     return res.status(500).json({ error: 'Failed to create product' });
   }
 }

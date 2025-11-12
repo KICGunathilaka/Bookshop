@@ -38,8 +38,9 @@ const Products: React.FC = () => {
       const res = await addProduct(payload);
       notifySuccess('Product saved');
       form.reset();
-    } catch (err) {
-      notifyError('Failed to save product');
+    } catch (err: any) {
+      const serverMsg = err?.response?.data?.error || err?.message || 'Failed to save product';
+      notifyError(serverMsg);
       console.error(err);
     }
   };
