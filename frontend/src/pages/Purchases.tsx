@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { searchVendors, type Vendor } from '../services/vendors';
 import { searchProducts } from '../services/products';
 import { createPurchase, type PurchaseItemInput, getNextInvoiceNo, listPurchases, type PurchaseListItem } from '../services/purchases';
+import { useNotify } from '../contexts/NotificationContext';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 const Purchases: React.FC = () => {
+  const { notifySuccess, notifyError } = useNotify();
   const navigate = useNavigate();
   const [showCreate, setShowCreate] = useState(true);
 
@@ -216,6 +218,7 @@ const Purchases: React.FC = () => {
     try {
       await createPurchase(payload);
       setSuccess('Purchase saved');
+      notifySuccess('Purchase saved');
       // reset
       setVendorQuery('');
       setVendorId(null);
@@ -226,6 +229,7 @@ const Purchases: React.FC = () => {
       setRows([{ productQuery: '', productId: null, productSuggestions: [], showProductSuggestions: false, brand: '', quantity: 1, unitPrice: 0 }]);
     } catch (err: any) {
       setError(err?.message || 'Failed to save purchase');
+      notifyError(err?.message || 'Failed to save purchase');
     } finally {
       setSaving(false);
     }

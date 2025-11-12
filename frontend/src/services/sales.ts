@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5001/api/sales';
+const API_URL = 'http://localhost:5000/api/sales';
 
 export type SaleItemInput = {
   inventoryId: number;
@@ -36,6 +36,9 @@ export type SaleListItem = {
   sale_date: string;
   total_amount: number;
   customer_name: string | null;
+  customer_phone: string | null;
+  customer_address: string | null;
+  note: string | null;
   items: Array<{
     product_id: number;
     product_name: string;

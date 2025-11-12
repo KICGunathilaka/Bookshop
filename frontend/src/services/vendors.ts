@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5001/api/vendors';
+const API_URL = 'http://localhost:5000/api/vendors';
 
 export type Vendor = {
   vendor_id: number;

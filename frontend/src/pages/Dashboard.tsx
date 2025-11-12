@@ -4,6 +4,8 @@ import { listInventory, type InventoryItem } from '../services/inventory';
 import { getProducts } from '../services/products';
 import { getVendors } from '../services/vendors';
 import { listSales, type SaleListItem } from '../services/sales';
+import { listPrintshopSales, type PrintshopSaleListItem } from '../services/printshopSales';
+import { getSalesSummary } from '../services/metrics';
 import { listExpenses } from '../services/expenses';
 import { listPurchases } from '../services/purchases';
 
@@ -36,7 +38,7 @@ const Dashboard: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
   const [inventoryCount, setInventoryCount] = useState<number>(0);
   const [todaySales, setTodaySales] = useState<number>(0);
   const [monthRevenue, setMonthRevenue] = useState<number>(0);
-  const [weeklySales, setWeeklySales] = useState<Array<{ date: string; total: number }>>([]);
+  const [weeklySales, setWeeklySales] = useState<Array<{ date: string; bookshop: number; printshop: number }>>([]);
   const [topProduct, setTopProduct] = useState<{ name: string; brand: string | null; units: number } | null>(null);
   const [todayExpenses, setTodayExpenses] = useState<number>(0);
   const [todayPurchases, setTodayPurchases] = useState<number>(0);
@@ -63,19 +65,27 @@ const Dashboard: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
         setInventoryCount((invAllRes.items ?? []).length);
 
         // Sales summary
+        const fmt = (d: Date) => {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          return `${y}-${m}-${dd}`;
+        };
         const today = new Date();
-        const to = today.toISOString().slice(0, 10);
-        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
-        const sevenDaysAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6).toISOString().slice(0, 10);
+        const to = fmt(today);
+        const monthStart = fmt(new Date(today.getFullYear(), today.getMonth(), 1));
+        const sevenDaysAgo = fmt(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6));
 
         const salesForMonth = await listSales({ from: monthStart, to, limit: 1000 });
         const salesToday = await listSales({ from: to, to, limit: 1000 });
         const salesWeek = await listSales({ from: sevenDaysAgo, to, limit: 1000 });
+        const psSalesWeek = await listPrintshopSales({ from: sevenDaysAgo, to, limit: 1000 });
         const expensesToday = await listExpenses({ from: to, to, limit: 1000 });
         const purchasesToday = await listPurchases({ from: to, to, limit: 1000 });
         const purchasesMonth = await listPurchases({ from: monthStart, to, limit: 1000 });
 
         const sum = (arr: SaleListItem[]) => arr.reduce((acc, s) => acc + Number(s.total_amount || 0), 0);
+        // Initially set bookshop-only values
         setMonthRevenue(sum(salesForMonth.sales));
         setTodaySales(sum(salesToday.sales));
         setTodayExpenses((expensesToday.expenses || []).reduce((acc, e) => acc + Number(e.amount || 0), 0));
@@ -106,20 +116,33 @@ const Dashboard: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
         }
         setTopProduct(best);
 
-        // Aggregate by day for the week
-        const byDay = new Map<string, number>();
+        // Aggregate by day for the week (bookshop)
+        const byDayBook = new Map<string, number>();
         for (const s of salesWeek.sales) {
           const d = String(s.sale_date).slice(0, 10);
-          byDay.set(d, (byDay.get(d) || 0) + Number(s.total_amount || 0));
+          byDayBook.set(d, (byDayBook.get(d) || 0) + Number(s.total_amount || 0));
+        }
+        // Aggregate by day for the week (printshop)
+        const byDayPrint = new Map<string, number>();
+        for (const s of psSalesWeek.sales) {
+          const d = String(s.sale_date).slice(0, 10);
+          byDayPrint.set(d, (byDayPrint.get(d) || 0) + Number(s.total_amount || 0));
         }
         // Ensure all 7 days present
         const dates: string[] = [];
         for (let i = 6; i >= 0; i--) {
           const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
-          const ds = d.toISOString().slice(0, 10);
+          const ds = fmt(d);
           dates.push(ds);
         }
-        setWeeklySales(dates.map(ds => ({ date: ds, total: byDay.get(ds) || 0 })));
+        setWeeklySales(dates.map(ds => ({ date: ds, bookshop: byDayBook.get(ds) || 0, printshop: byDayPrint.get(ds) || 0 })));
+
+        // Override tiles with combined Bookshop + Printshop totals
+        try {
+          const summary = await getSalesSummary();
+          setTodaySales(Number(summary.today.total || 0));
+          setMonthRevenue(Number(summary.month.total || 0));
+        } catch {}
       } catch (e) {
         // Fail silently on dashboard; keep placeholders
       }
@@ -127,7 +150,7 @@ const Dashboard: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
     run();
   }, []);
 
-  const weeklyMax = useMemo(() => Math.max(1, ...weeklySales.map(d => d.total)), [weeklySales]);
+  const weeklyMax = useMemo(() => Math.max(1, ...weeklySales.map(d => Math.max(d.bookshop, d.printshop))), [weeklySales]);
   const pieTotal = useMemo(() => vendorPurchases.reduce((acc, v) => acc + v.total, 0), [vendorPurchases]);
   const pieSegments = useMemo(() => {
     let startDeg = 0;
@@ -203,6 +226,14 @@ const Dashboard: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
               className={({ isActive }) => (isActive ? 'navlink active' : 'navlink')}
             >
               Sales
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/printshop-sales"
+              className={({ isActive }) => (isActive ? 'navlink active' : 'navlink')}
+            >
+              Printshop & Sales
             </NavLink>
           </li>
           <li>
@@ -301,15 +332,29 @@ const Dashboard: React.FC<{ onLogout?: () => void }> = ({ onLogout }) => {
               </div>
               <div className="bar-chart">
                 {weeklySales.map((d, idx) => {
-                  const height = Math.round((d.total / weeklyMax) * 120);
+                  const hBook = Math.round((d.bookshop / weeklyMax) * 120);
+                  const hPrint = Math.round((d.printshop / weeklyMax) * 120);
                   const dayLabel = new Date(d.date).toLocaleDateString(undefined, { weekday: 'short' });
                   return (
-                    <div key={d.date + idx} className="bar-wrap">
-                      <div className="bar" style={{ height }} title={`Rs ${d.total.toFixed(2)}`}></div>
-                      <div className="bar-label">{dayLabel}</div>
+                    <div key={d.date + idx} className="bar-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end', height: 124 }}>
+                        <div className="bar" style={{ height: hBook, width: 14, background: '#3b82f6' }} title={`Bookshop Rs ${d.bookshop.toFixed(2)}`}></div>
+                        <div className="bar" style={{ height: hPrint, width: 14, background: '#10b981' }} title={`Printshop Rs ${d.printshop.toFixed(2)}`}></div>
+                      </div>
+                      <div className="bar-label" style={{ marginTop: 4 }}>{dayLabel}</div>
                     </div>
                   );
                 })}
+              </div>
+              <div className="chart-legend" style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 12, height: 12, backgroundColor: '#3b82f6', display: 'inline-block', borderRadius: 2 }}></span>
+                  <span>Bookshop</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 12, height: 12, backgroundColor: '#10b981', display: 'inline-block', borderRadius: 2 }}></span>
+                  <span>Printshop</span>
+                </div>
               </div>
             </div>
 

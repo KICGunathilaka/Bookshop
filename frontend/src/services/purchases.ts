@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5001/api/purchases';
+const API_URL = 'http://localhost:5000/api/purchases';
 
 export type PurchaseItemInput = {
   productId: number;
