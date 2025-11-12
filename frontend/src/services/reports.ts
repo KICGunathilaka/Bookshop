@@ -1,5 +1,7 @@
-// Reports service pointing to backend on port 5001
-const API_URL = 'http://localhost:5000/api/reports';
+const API_BASE = (import.meta.env && typeof import.meta.env.VITE_API_BASE === 'string'
+  ? import.meta.env.VITE_API_BASE
+  : 'http://localhost:5000');
+const API_URL = `${API_BASE}/api/reports`;
 
 export async function downloadPrintshopItemsCSV(params: { from?: string; to?: string; filename?: string } = {}): Promise<void> {
   const url = new URL(`${API_URL}/printshop-items.csv`);
