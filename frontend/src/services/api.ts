@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/auth';
+const API_BASE = (import.meta.env && typeof import.meta.env.VITE_API_BASE === 'string'
+  ? import.meta.env.VITE_API_BASE
+  : 'http://localhost:5000');
+const API_URL = `${API_BASE}/api/auth`;
 
 export interface LoginResponse {
   message: string;
@@ -8,7 +11,7 @@ export interface LoginResponse {
 }
 
 export const login = async (username: string, password?: string): Promise<LoginResponse> => {
-  const body: Record<string, any> = { username };
+  const body: Record<string, unknown> = { username };
   if (password !== undefined && password !== null) {
     body.password = password;
   }

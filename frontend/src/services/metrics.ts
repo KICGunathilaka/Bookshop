@@ -1,5 +1,7 @@
-// Temporarily point metrics to backend on port 5001 to pick up updated summary
-const API_URL = 'http://localhost:5000/api/metrics';
+const API_BASE = (import.meta.env && typeof import.meta.env.VITE_API_BASE === 'string'
+  ? import.meta.env.VITE_API_BASE
+  : 'http://localhost:5000');
+const API_URL = `${API_BASE}/api/metrics`;
 
 export type SalesSummary = {
   today: { bookshop: number; printshop: number; total: number };

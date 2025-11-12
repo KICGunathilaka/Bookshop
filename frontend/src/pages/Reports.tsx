@@ -129,7 +129,18 @@ const Reports: React.FC = () => {
   };
 
   const printReport = () => {
-    window.print();
+    const table = document.getElementById('report-table');
+    if (!table) return;
+    const tableHtml = table.outerHTML;
+    const styles = `@page { size: A4; margin: 16mm; } body { font-family: Arial, sans-serif; color: #000; } h1 { font-size: 18px; margin: 0 0 12px; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #000; padding: 6px; font-size: 12px; } thead th { background: #f0f0f0; } footer { margin-top: 10px; font-size: 10px; color: #555; }`;
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>${reportTitle}</title><style>${styles}</style></head><body><h1>${reportTitle}</h1>${tableHtml}<footer>Generated on ${new Date().toLocaleString()}</footer></body></html>`;
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    w.onload = () => { w.print(); w.close(); };
   };
 
   return (

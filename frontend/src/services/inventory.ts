@@ -1,6 +1,7 @@
-// Temporarily point inventory API to backend on port 5001 to ensure updated
-// consumption logic is active while port 5000 server is restarted.
-const API_URL = 'http://localhost:5000/api/inventory';
+const API_BASE = (import.meta.env && typeof import.meta.env.VITE_API_BASE === 'string'
+  ? import.meta.env.VITE_API_BASE
+  : 'http://localhost:5000');
+const API_URL = `${API_BASE}/api/inventory`;
 
 export type InventoryItem = {
   inventory_id: number;

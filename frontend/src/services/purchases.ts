@@ -1,4 +1,7 @@
-const API_URL = 'http://localhost:5000/api/purchases';
+const API_BASE = (import.meta.env && typeof import.meta.env.VITE_API_BASE === 'string'
+  ? import.meta.env.VITE_API_BASE
+  : 'http://localhost:5000');
+const API_URL = `${API_BASE}/api/purchases`;
 
 export type PurchaseItemInput = {
   productId: number;

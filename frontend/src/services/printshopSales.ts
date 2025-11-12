@@ -1,5 +1,7 @@
-// Temporarily point printshop sales API to backend on port 5001
-const API_URL = 'http://localhost:5000/api/printshop-sales';
+const API_BASE = (import.meta.env && typeof import.meta.env.VITE_API_BASE === 'string'
+  ? import.meta.env.VITE_API_BASE
+  : 'http://localhost:5000');
+const API_URL = `${API_BASE}/api/printshop-sales`;
 
 export type PrintshopSaleItemInput = {
   inventoryId: number;
